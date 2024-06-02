@@ -1,0 +1,12 @@
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:default}
+application:
+  title: InvoiceApp
+  version: 1.0
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

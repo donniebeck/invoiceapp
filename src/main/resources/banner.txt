@@ -1,0 +1,7 @@
+    ____                         _
+   / __ \____  ____  ____  ___  (_)
+  / / / / __ \/ __ \/ __ \/ _ \/ / 
+ / /_/ / /_/ / / / / / / /  __/ /  
+/_____/\____/_/ /_/_/ /_/\___/_/
+${application.title} ${application.version}
+Powered by Sprint Boot ${spring-boot.formatted-version}
