@@ -1,6 +1,7 @@
 package com.example.invoiceapp.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +23,8 @@ public class User {
     private String firstName;
     @NotEmpty(message = "Last name cannot be empty")
     private String lastName;
-    @NotEmpty(message = "Invalid email. Please enter a valid email address.")
+    @NotEmpty(message = "Email cannot be empty")
+    @Email(message = "Invalid email. Please enter a valid email address.")
     private String email;
     @NotEmpty(message = "Password cannot be empty")
     private String password;

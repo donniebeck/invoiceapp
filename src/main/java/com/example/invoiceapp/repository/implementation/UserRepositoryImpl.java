@@ -32,6 +32,7 @@ import static com.example.invoiceapp.query.UserQuery.*;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.commons.lang3.time.DateFormatUtils.format;
 import static org.apache.commons.lang3.time.DateUtils.addDays;
+import static utils.SmsUtils.sendSMS;
 
 @Repository
 @RequiredArgsConstructor
@@ -154,10 +155,40 @@ public class UserRepositoryImpl implements UserRepository<User>, UserDetailsServ
             log.debug("Verification Code: " + verificationCode);
 
             // Send SMS
-//            sendSMS(user.getPhone(), "From: DonnieInvoiceApp \nVerification Code\n" + verificationCode);
+            //sendSMS(user.getPhone(), "From: DonnieInvoiceApp \nVerification Code\n" + verificationCode);
+            log.info("Verification Code: " + verificationCode);
         } catch (Exception e) {
             log.error("Error sending verification code: " + e.getMessage(), e);
             throw new ApiException("An error occurred.");
+        }
+    }
+
+    @Override
+    public User verifyCode(String email, String code) {
+        if(isVerificationCodeExpired(code)) throw new ApiException("Verification code expired.");
+        try {
+            User userByCode = jdbc.queryForObject(SELECT_USER_BY_USER_CODE_QUERY, Map.of("code", code), new UserRowMapper());
+            User userByEmail = jdbc.queryForObject(SELECT_USER_BY_EMAIL_QUERY,  Map.of("email", email), new UserRowMapper());
+            if (userByCode.getEmail().equals(userByEmail.getEmail())) {
+                jdbc.update(DELETE_CODE, Map.of("code", code));
+                return userByCode;
+            } else {
+                throw new ApiException("Code is invalid. Please try again.");
+            }
+        } catch (EmptyResultDataAccessException e) {
+            throw new ApiException("Unable to find record");
+        } catch (Exception e) {
+            throw new ApiException("An error occurred. Please try again.");
+        }
+    }
+
+    private Boolean isVerificationCodeExpired(String code) {
+        try {
+            return jdbc.queryForObject(SELECT_CODE_EXPIRATION_QUERY, Map.of("code", code) , Boolean.class);
+        }  catch (EmptyResultDataAccessException e) {
+            throw new ApiException("Code not valid. Please try again.");
+        } catch (Exception e) {
+            throw new ApiException("An error occurred. Please try again.");
         }
     }
 }

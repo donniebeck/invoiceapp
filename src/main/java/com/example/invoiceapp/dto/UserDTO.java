@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
 public class UserDTO {
     private Long id;
     private String firstName;
@@ -23,4 +22,6 @@ public class UserDTO {
     private boolean isNotLocked;
     private boolean isUsingMfa;
     private LocalDateTime createdAt;
+    private String roleName;
+    private String permissions;
 }
