@@ -15,7 +15,7 @@ This repository contains the source code for an invoicing application, a work-in
 - **Backend**: Spring Boot, Java, JDBC, Spring Security
 - **Frontend**: Angular, HTML, CSS, JavaScript
 - **Database**: MySQL
-- **Authentication**: Twilio
+- **2FA**: Twilio, Java EE Mail
 - **Server**: Apache Tomcat
 
 ## Current Status
