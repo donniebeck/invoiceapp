@@ -21,3 +21,5 @@ This repository contains the source code for an invoicing application, a work-in
 ## Current Status
 
 This project is currently in progress and serves as a proof of concept. The primary focus at this stage is on implementing core functionalities and ensuring a secure and reliable system.
+
+Twilio module is currently hotswapped out for AT&T email-to-text so I don't waste my Twilio credits.
