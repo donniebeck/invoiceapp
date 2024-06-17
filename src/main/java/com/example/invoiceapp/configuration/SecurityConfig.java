@@ -1,5 +1,6 @@
 package com.example.invoiceapp.configuration;
 
+import com.example.invoiceapp.filter.CustomAuthorizationFilter;
 import com.example.invoiceapp.handler.CustomAccessDeniedHandler;
 import com.example.invoiceapp.handler.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -32,8 +34,10 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final UserDetailsService userDetailsService;
+    private final CustomAuthorizationFilter authorizationFilter;
 
-    private static final String[] PUBLIC_URLS = { "/user/login/**", "/user/register/**" , "/user/verify/code/**"};
+    private static final String[] PUBLIC_URLS = { "/user/login/**", "/user/verify/code/**", "/user/register/**",};
+    private static final String OPTIONS = "OPTIONS";
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -47,11 +51,11 @@ public class SecurityConfig {
                                 .authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(request ->
                         request.requestMatchers(PUBLIC_URLS).permitAll()
-                                //.requestMatchers(OPTIONS).permitAll()
+                                .requestMatchers(OPTIONS).permitAll()
                                 .requestMatchers(DELETE, "user/delete/**").hasAnyAuthority("DELETE:USER")
                                 .requestMatchers(DELETE, "customer/delete/**").hasAnyAuthority("DELETE:CUSTOMER")
-                                .anyRequest().authenticated());
-        //.addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class);
+                                .anyRequest().authenticated())
+                .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

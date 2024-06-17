@@ -4,9 +4,3 @@ spring:
 application:
   title: InvoiceApp
   version: 1.0
-
-logging:
-  level:
-    org:
-      springframework:
-        security: DEBUG
