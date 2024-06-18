@@ -99,6 +99,49 @@ public class UserResource {
         return ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/get/<userId>").build().toUri();
     }
 
+    @GetMapping("/resetpassword/{email}")
+    public ResponseEntity<HttpResponse> resetPassword(@PathVariable("email") String email) {
+       userService.resetPassword(email);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .message("Password reset email sent!")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build());
+
+    }
+
+    @GetMapping("/verify/password/{key}")
+    public ResponseEntity<HttpResponse> verifyPassword(@PathVariable("key") String key) {
+        UserDTO user = userService.verifyPasswordKey(key);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .data(Map.of(
+                                "user", user)
+                        )
+                        .message("Enter new password")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build());
+
+    }
+
+    @PostMapping("/resetpassword/{key}/{password}/{confirmPassword}")
+    public ResponseEntity<HttpResponse> resetPasswordWithKey(@PathVariable("key") String key, @PathVariable("password") String password,
+                                                      @PathVariable("confirmPassword") String confirmPassword) {
+        userService.renewPassword(key, password, confirmPassword);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .message("Password reset!")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build());
+
+    }
+
     private ResponseEntity<HttpResponse> sendResponse(UserDTO user) {
         return ResponseEntity.ok().body(
                 HttpResponse.builder()
