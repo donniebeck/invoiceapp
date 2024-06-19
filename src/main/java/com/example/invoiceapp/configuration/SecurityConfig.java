@@ -36,7 +36,7 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final CustomAuthorizationFilter authorizationFilter;
 
-    private static final String[] PUBLIC_URLS = { "/user/login/**", "/user/verify/code/**", "/user/register/**", "/user/resetpassword/**", "/user/verify/password/**"};
+    private static final String[] PUBLIC_URLS = { "/user/login/**", "/user/verify/code/**", "/user/register/**", "/user/resetpassword/**", "/user/verify/password/**", "/user/verify/account/**", "/user/refresh/token/**"};
     private static final String OPTIONS = "OPTIONS";
 
     @Bean

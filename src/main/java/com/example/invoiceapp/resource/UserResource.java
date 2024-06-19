@@ -9,6 +9,7 @@ import com.example.invoiceapp.form.LoginForm;
 import com.example.invoiceapp.provider.TokenProvider;
 import com.example.invoiceapp.service.RoleService;
 import com.example.invoiceapp.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +25,8 @@ import java.util.Map;
 
 import static com.example.invoiceapp.dtomapper.UserDTOMapper.toUser;
 import static java.time.LocalTime.now;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.security.authentication.UsernamePasswordAuthenticationToken.unauthenticated;
 import static utils.ExceptionUtils.processError;
 
@@ -40,6 +41,7 @@ public class UserResource {
     private final AuthenticationManager authenticationManager;
     private final TokenProvider tokenProvider;
     private final HttpServletResponse response;
+    private static final String TOKEN_PREFIX = "Bearer ";
 
     @PostMapping("/register")
     public ResponseEntity<HttpResponse> saveUser(@RequestBody @Valid User user) {
@@ -140,6 +142,52 @@ public class UserResource {
                         .statusCode(OK.value())
                         .build());
 
+    }
+
+    @GetMapping("/verify/account/{key}")
+    public ResponseEntity<HttpResponse> verifyAccount(@PathVariable("key") String key) {
+        return ResponseEntity.ok().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .message(userService.verifyAccountKey(key).isEnabled()? "Account already verified" : "Account verified")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build());
+    }
+
+    @GetMapping("/refresh/token")
+    public ResponseEntity<HttpResponse> refreshToken(HttpServletRequest request) {
+        if(isHeaderAndTokenValid(request)) {
+            String token = request.getHeader(AUTHORIZATION).substring(TOKEN_PREFIX.length());
+            UserDTO user = userService.getUserByEmail(tokenProvider.getSubject(token, request));
+            return ResponseEntity.ok().body(
+                    HttpResponse.builder()
+                            .timeStamp(now().toString())
+                            .data(Map.of(
+                                    "user", user,
+                                    "access_token", tokenProvider.createAccessToken(getUserPrincipal(user)),
+                                    "refresh_token", token)
+                            )
+                            .message("Token refreshed")
+                            .status(OK)
+                            .statusCode(OK.value())
+                            .build());
+        }
+        return ResponseEntity.badRequest().body(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .reason("Refresh token invalid")
+                        .status(BAD_REQUEST)
+                        .statusCode(BAD_REQUEST.value())
+                        .build());
+    }
+
+    private boolean isHeaderAndTokenValid(HttpServletRequest request) {
+        return request.getHeader(AUTHORIZATION) != null
+                && request.getHeader(AUTHORIZATION).startsWith(TOKEN_PREFIX)
+                && tokenProvider.isTokenValid(
+                        tokenProvider.getSubject(request.getHeader(AUTHORIZATION).substring(TOKEN_PREFIX.length()), request), //email
+                        request.getHeader(AUTHORIZATION).substring(TOKEN_PREFIX.length())); //token
     }
 
     private ResponseEntity<HttpResponse> sendResponse(UserDTO user) {

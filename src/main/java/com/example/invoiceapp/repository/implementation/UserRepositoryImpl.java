@@ -220,6 +220,19 @@ public class UserRepositoryImpl implements UserRepository<User>, UserDetailsServ
         }
     }
 
+    @Override
+    public User verifyAccountKey(String key) {
+        try {
+            User user = jdbc.queryForObject(SELECT_USER_BY_ACCOUNT_URL_QUERY, Map.of("url",  getVerificationUrl(key, ACCOUNT.getType())) , new UserRowMapper());
+            jdbc.update(UPDATE_USER_ENABLED_QUERY, Map.of("enabled", true, "id", user.getId()));
+            return user;
+        }  catch (EmptyResultDataAccessException e) {
+            throw new ApiException("This link is not valid.");
+        } catch (Exception e) {
+            throw new ApiException("An error occurred. Please try again.");
+        }
+    }
+
     private Boolean isLinkExpired(String key, VerificationType password) {
         try {
             return jdbc.queryForObject(SELECT_EXPIRATION_BY_URL, Map.of("url", getVerificationUrl(key, password.getType())) , Boolean.class);
